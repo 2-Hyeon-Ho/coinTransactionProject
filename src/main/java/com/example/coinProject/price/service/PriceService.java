@@ -84,7 +84,6 @@ public class PriceService {
         return downEma;
     }
 
-
     public Map<String, Double> getAllMarketsRsi() {
 
         Map<String, Double> coinsRsi = new HashMap<>();
