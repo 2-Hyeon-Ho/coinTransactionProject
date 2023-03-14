@@ -9,8 +9,6 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 public class AccountResponse {
-    @JsonProperty("Source")
-    private List<AccountResponse> accountResponseList;
 
     private String currency;
 

@@ -19,7 +19,7 @@ public class AccountController {
     private final AccountService accountService;
 
     @GetMapping
-    public AccountResponse accounts() throws IOException {
+    public List<AccountResponse> accounts() throws IOException {
         return accountService.accounts();
 
     }
