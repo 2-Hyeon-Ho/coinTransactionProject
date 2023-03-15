@@ -26,4 +26,15 @@ public class AccountResponse {
     private String unitCurrency;
 
 
+    @Override
+    public String toString() {
+        return "AccountResponse{" +
+                "화폐'" + currency + '\'' +
+                ", 잔액 " + balance + '\'' +
+                ", locked='" + locked + '\'' +
+                ", 평균매수가" + averageBuyPrice + '\'' +
+                ", averageBuyPriceModified=" + averageBuyPriceModified +
+                ", 화폐단위'" + unitCurrency + '\'' +
+                '}';
+    }
 }

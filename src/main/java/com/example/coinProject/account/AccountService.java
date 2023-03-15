@@ -32,9 +32,9 @@ public class AccountService {
     public List<AccountResponse> accounts() {
 
 
-        Algorithm algorithm = Algorithm.HMAC256("VXcwtM9Rlx63xFUMeQlGcxQgiJeymG5hDcaRGUEz");
+        Algorithm algorithm = Algorithm.HMAC256("FhiLp0Js9yD8RbckwVjsmBSRc7x3zxKBxrigbOlY");
         String jwtToken = JWT.create()
-                .withClaim("access_key", "2RGbxSEFVGE10BUhaDtIyIYUkc9WBOQV07V0PSXL")
+                .withClaim("access_key", "Dzk2wv7sOKLYsP1Oz1xmnsVPaxKEMUMtW7lyxaFv")
                 .withClaim("nonce", UUID.randomUUID().toString())
                 .sign(algorithm);
 
@@ -44,11 +44,6 @@ public class AccountService {
         httpHeaders.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpHeaders.add("Authorization", authenticationToken);
 
-//            HttpResponse response = client.execute(request);
-//            HttpEntity entity = response.getEntity();
-
-
-//            String s = EntityUtils.toString(entity);
 
         URI uri = URI.create("https://api.upbit.com" + "/v1/accounts");
 

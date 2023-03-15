@@ -24,7 +24,7 @@ public class PriceService {
     private double day = 14;
 
     private double average = (double) 1 / (1 + (day - 1));
-    private static final int UNIT = 30;
+    private static final int UNIT = 1;
 
     private static final int COUNT = 200;
 

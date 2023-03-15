@@ -25,7 +25,6 @@ public class CoinService {
 
     @Transactional
     public List<CoinResponse> getCoinResponse() {
-        log.info("{}", feign.getMarketCode());
         return feign.getMarketCode();
     }
 
