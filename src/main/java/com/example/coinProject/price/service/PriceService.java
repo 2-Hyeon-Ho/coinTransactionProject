@@ -21,60 +21,57 @@ import java.util.List;
 @Slf4j
 public class PriceService {
 
-    private static final String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern(
-        "yyyy-MM-dd HH:mm:ss"));
-    private static final String yesterday = LocalDateTime.now().minusDays(1)
-        .format(DateTimeFormatter.ofPattern(
-            "yyyy-MM-dd HH:mm:ss"));
+//    private static final String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+//        "yyyy-MM-dd HH:mm:ss"));
+//    private static final String yesterday = LocalDateTime.now().minusDays(1)
+//        .format(DateTimeFormatter.ofPattern(
+//            "yyyy-MM-dd HH:mm:ss"));
     private static final int UNIT = 5;
-    private static final double EMA = (double) 1 / 14;
+    private static final double EMA = (double) 1 / (1 + (14 - 1));
     private static final int COUNT = 200;
 
     private final Feign feign;
     private final CoinRepository coinRepository;
-    LimitedQueue<BigDecimal> upQueue = new LimitedQueue<>(200);
-    LimitedQueue<BigDecimal> downQueue = new LimitedQueue<>(200);
+    LimitedQueue<Double> upQueue = new LimitedQueue<>(200);
+    LimitedQueue<Double> downQueue = new LimitedQueue<>(200);
 
 
     @Transactional
     public Double getRsi() {
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+            "yyyy-MM-dd HH:mm:ss"));
+        String yesterday = LocalDateTime.now().minusDays(1)
+            .format(DateTimeFormatter.ofPattern(
+                "yyyy-MM-dd HH:mm:ss"));
         List<PriceResponse> todayPrices = feign.getTradePrice(UNIT, "KRW-BTC",
             now, COUNT);
         List<PriceResponse> yesterdayPrices = feign.getTradePrice(UNIT, "KRW-BTC",
             yesterday, COUNT);
 
-        for (int i = 0; i < 200; i++) {
-            BigDecimal todayPrice = todayPrices.get(i).getPrice();
-            BigDecimal yesterdayPrice = yesterdayPrices.get(i).getPrice();
 
-            BigDecimal difference = todayPrice.subtract(yesterdayPrice);
-            System.out.println("difference = " + difference);
-            if (difference.longValue() > 0) {
+
+        for (int i = 0; i < 200; i++) {
+            Double todayPrice = todayPrices.get(i).getPrice().doubleValue();
+            Double yesterdayPrice = yesterdayPrices.get(i).getPrice().doubleValue();
+
+            double difference = todayPrice - yesterdayPrice;
+            if (difference > 0) {
                 upQueue.add(difference);
-                downQueue.add(BigDecimal.valueOf(0));
-            } else if (difference.longValue() < 0) {
-                upQueue.add(BigDecimal.valueOf(0));
-                downQueue.add(difference.abs());
+                downQueue.add(0d);
+            } else if (difference < 0) {
+                upQueue.add(0d);
+                downQueue.add(Math.abs(difference));
             } else {
                 upQueue.add(difference);
                 downQueue.add(difference);
             }
         }
 
-        double test = upQueue.stream().mapToDouble(it -> it.doubleValue()).sum() / 200;
-        double test2 = downQueue.stream().mapToDouble(it -> it.doubleValue()).sum() / 200;
-        System.out.println("test = " + test);
-        System.out.println("test2 = " + test2);
-
-        double rs2 = test / test2;
-        double rsi2 = rs2 / (1+rs2);
-        System.out.println("rsi2 = " + rsi2);
-
-        double v = getAU().doubleValue();
-        double v1 = getAD().doubleValue();
-        System.out.println("v = " + v);
-        System.out.println("v1 = " + v1);
-        double rs = getAU().doubleValue() / getAD().doubleValue();
+//        double v = getAU().doubleValue();
+//        double v1 = getAD().doubleValue();
+//        System.out.println("v = " + v);
+//        System.out.println("v1 = " + v1);
+        double rs = getAU() / getAD();
         return 100 - (100 / (1 + rs));
     }
 
@@ -84,28 +81,44 @@ public class PriceService {
         );
     }
 
-    private BigDecimal getAU() {
-        BigDecimal upEma = BigDecimal.valueOf(0);
+    private double getAU() {
+        double upEma = 0d;
         if (!CollectionUtils.isEmpty(upQueue)) {
-            upEma = upQueue.poll();
+            upEma = upQueue.remove();
             if (upQueue.size() > 1) {
-                for (BigDecimal upElement : upQueue) {
-                    upEma = (upElement.multiply(BigDecimal.valueOf(EMA))).add(upEma.multiply(
-                        BigDecimal.valueOf(1 - EMA)));
+//                for (BigDecimal upElement : upQueue) {
+//                    upEma = (upElement.multiply(BigDecimal.valueOf(EMA))).add(upEma.multiply(
+//                        BigDecimal.valueOf(1 - EMA)));
+//                }
+
+//                for (Double upElement : upQueue) {
+//                    upEma = (upElement * EMA) + (upEma * (1-EMA));
+//                }
+                while (!upQueue.isEmpty()) {
+                    Double upElement = upQueue.poll();
+                    upEma = (upElement * EMA) + (upEma * (1-EMA));
                 }
             }
         }
         return upEma;
     }
 
-    private BigDecimal getAD() {
-        BigDecimal downEma = BigDecimal.valueOf(0);
+    private double getAD() {
+        double downEma = 0d;
         if (!CollectionUtils.isEmpty(downQueue)) {
-            downEma = downQueue.poll();
+            downEma = downQueue.remove();
             if (downQueue.size() > 1) {
-                for (BigDecimal downElement : downQueue) {
-                    downEma = (downElement.multiply(BigDecimal.valueOf(EMA))).add(downEma.multiply(
-                        BigDecimal.valueOf(1 - EMA)));
+//                for (BigDecimal downElement : downQueue) {
+//                    downEma = (downElement.multiply(BigDecimal.valueOf(EMA))).add(downEma.multiply(
+//                        BigDecimal.valueOf(1 - EMA)));
+//                }
+
+//                for (Double downElement : downQueue) {
+//                    downEma = (downElement * EMA) + (downEma * (1-EMA));
+//                }
+                while (!downQueue.isEmpty()) {
+                    Double downElement = downQueue.poll();
+                    downEma = (downElement * EMA) + (downEma * (1-EMA));
                 }
             }
         }
