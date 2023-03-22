@@ -2,6 +2,7 @@ package com.example.coinProject.account;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.coinProject.accessKeys.Keys;
 import com.example.coinProject.common.JsonUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +25,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccountService {
 
-
+    private Keys keys = new Keys();
     // access : bj4TbzRxlxOIlfxf4iATx0CL6McBN0xy8keGPs1A
     // secret : K3aJadDsGdYd4e4CTkudx1O8lJx8UGdTqiGafmUN
     private RestTemplate restTemplate = new RestTemplate();
@@ -32,9 +33,9 @@ public class AccountService {
     public List<AccountResponse> accounts() {
 
 
-        Algorithm algorithm = Algorithm.HMAC256("FhiLp0Js9yD8RbckwVjsmBSRc7x3zxKBxrigbOlY");
+        Algorithm algorithm = Algorithm.HMAC256(keys.getSecretKey());
         String jwtToken = JWT.create()
-                .withClaim("access_key", "Dzk2wv7sOKLYsP1Oz1xmnsVPaxKEMUMtW7lyxaFv")
+                .withClaim("access_key", keys.getAccessKey())
                 .withClaim("nonce", UUID.randomUUID().toString())
                 .sign(algorithm);
 

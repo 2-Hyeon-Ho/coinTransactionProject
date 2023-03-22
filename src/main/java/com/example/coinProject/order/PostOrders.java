@@ -3,40 +3,50 @@ package com.example.coinProject.order;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.coinProject.accessKeys.Keys;
-import com.example.coinProject.account.AccountResponse;
 import com.example.coinProject.common.JsonUtil;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 
 @Service
+@RequiredArgsConstructor
 public class PostOrders {
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
-    public List<OrderResponse> order() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private Keys keys = new Keys();
 
+    public void order() throws Exception {
 
         HashMap<String, String> params = new HashMap<>();
         params.put("market", "KRW-BTC");
         params.put("side", "bid");
         params.put("volume", null);
         params.put("price", "6000");
-        params.put("ord_type", "market");
+        params.put("ord_type", "price");
 
         ArrayList<String> queryElements = new ArrayList<>();
         for (Map.Entry<String, String> entity : params.entrySet()) {
@@ -45,14 +55,16 @@ public class PostOrders {
 
         String queryString = String.join("&", queryElements.toArray(new String[0]));
 
+        System.out.println("queryString = " + queryString);
+
         MessageDigest md = MessageDigest.getInstance("SHA-512");
         md.update(queryString.getBytes("UTF-8"));
 
         String queryHash = String.format("%0128x", new BigInteger(1, md.digest()));
 
-        Algorithm algorithm = Algorithm.HMAC256("FhiLp0Js9yD8RbckwVjsmBSRc7x3zxKBxrigbOlY");
+        Algorithm algorithm = Algorithm.HMAC512("rhWxcZXT2VBC5xNR4HJO9r1YafH5b9rLNxDhOEQV");
         String jwtToken = JWT.create()
-                .withClaim("access_key", "Dzk2wv7sOKLYsP1Oz1xmnsVPaxKEMUMtW7lyxaFv")
+                .withClaim("access_key", "fbKE9lhKEA3IgyiQMkFBLimqRUMQp2xwprZNvCiv")
                 .withClaim("nonce", UUID.randomUUID().toString())
                 .withClaim("query_hash", queryHash)
                 .withClaim("query_hash_alg", "SHA512")
@@ -60,29 +72,42 @@ public class PostOrders {
 
         String authenticationToken = "Bearer " + jwtToken;
 
-//        try {
-//            HttpClient client = HttpClientBuilder.create().build();
-//            HttpPost request = new HttpPost(
-//                    "https://api.upbit.com" + "/v1/orders");
-//            request.setHeader("Content-Type", "application/json");
-//            request.addHeader("Authorization", authenticationToken);
-//            request.setEntity(new StringEntity(JsonUtil.toJson(params)));
-//
-//            HttpResponse response = client.execute(request);
-//            HttpEntity entity = response.getEntity();
-//
-//            System.out.println("asd "  + EntityUtils.toString(entity, "UTF-8"));
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpHeaders.set("Authorization", authenticationToken);
+        httpHeaders.set(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.set(AUTHORIZATION, authenticationToken);
+
+        URI uri = URI.create("https://api.upbit.com" + "/v1/orders" + "?" + queryString);
+
+        System.out.println("httpheaders : " + httpHeaders);
+
+        HttpEntity<String> hashMapHttpEntity = new HttpEntity<>(objectMapper.writeValueAsString(params), httpHeaders);
+
+        System.out.println("hashMapHttpEntity = " + hashMapHttpEntity);
+
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+
+        ResponseEntity<JsonNode> exchange = restTemplate.exchange(uri, HttpMethod.POST, hashMapHttpEntity, JsonNode.class);
+
+        System.out.println("exchange = " + exchange);
+//
+//        if (exchange.getStatusCode() != HttpStatus.CREATED) {
+//            throw new Exception("StatusCode = " + exchange.getStatusCode().value());
+//        }
 
 
-        URI uri = URI.create("https://api.upbit.com" + "/v1/orders");
+//        ResponseEntity<String> response =
+//                restTemplate.exchange(uri, HttpMethod.POST, new HttpEntity(params, httpHeaders), String.class);
 
-        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity(httpHeaders), String.class);
+//        System.out.println("asd " + EntityUtils.toString(entity, "UTF-8"));
 
-        return JsonUtil.listFromJson(response.getBody(), OrderResponse.class);
+//        HttpHeaders httpHeaders = new HttpHeaders();
+//        httpHeaders.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+//        httpHeaders.add("Authorization", authenticationToken);
+//        URI uri = URI.create("https://api.upbit.com" + "/v1/accounts");
+//
+//        httpHeaders.setLocation(uri);
+
 
     }
 
