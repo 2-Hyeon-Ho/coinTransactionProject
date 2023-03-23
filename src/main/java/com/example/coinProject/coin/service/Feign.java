@@ -18,6 +18,5 @@ public interface Feign {
     @GetMapping("/candles/minutes/{unit}")
     List<PriceResponse> getTradePrice(@PathVariable("unit") int unit,
         @RequestParam(name = "market") String market,
-        @RequestParam(name = "to") String time,
         @RequestParam(name = "count") int count);
 }

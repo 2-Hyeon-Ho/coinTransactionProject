@@ -19,10 +19,15 @@ public class CoinResponse {
     @JsonProperty("english_name")
     private String engName;
 
+    private Double rsi;
+
+
+
     public CoinResponse(Coin coin) {
         this.coinNo = coin.getCoinNo();
         this.market = coin.getMarket();
         this.korName = coin.getKorName();
         this.engName = coin.getEngName();
+        this.rsi = coin.getRsi();
     }
 }

@@ -16,4 +16,6 @@ public class TickerResult {
 
     @JsonProperty("change_price")
     private BigDecimal changePrice;
+
+    private Long timestamp;
 }

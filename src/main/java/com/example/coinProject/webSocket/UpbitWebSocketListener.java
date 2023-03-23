@@ -39,9 +39,6 @@ public class UpbitWebSocketListener extends WebSocketListener {
 
     private OrderBookResult orderBookResult;
 
-    private final Queue<BigDecimal> up = new LimitedQueue<>(200);
-    private final Queue<BigDecimal> down = new LimitedQueue<>(200);
-
 
     @Override
     public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
@@ -78,49 +75,6 @@ public class UpbitWebSocketListener extends WebSocketListener {
             case TICKER:
                 tickerResult = JsonUtil.fromJson(bytes.string(StandardCharsets.UTF_8), TickerResult.class);
 
-
-                Double upAverage = Double.valueOf(0);
-                Double downAverage = Double.valueOf(0);
-
-                BigDecimal AD = new BigDecimal(0);
-                BigDecimal AU = new BigDecimal(0);
-                if (tickerResult.getChange().equals("FALL")) {
-                    down.add(tickerResult.getChangePrice());
-
-                } else if (tickerResult.getChange().equals("RISE")) {
-                    up.add(tickerResult.getChangePrice());
-                }
-
-                BigDecimal upEma = BigDecimal.valueOf(0);
-
-                BigDecimal downEma = BigDecimal.valueOf(0);
-
-                if (!CollectionUtils.isEmpty(down)) {
-                    downEma = down.poll();
-                    if (down.size() > 1) {
-                        for (BigDecimal downElement : down) {
-                            downEma = (downElement.multiply(BigDecimal.valueOf(EMA))).add(downEma.multiply(
-                                    BigDecimal.valueOf(1 - EMA)));
-                        }
-                    }
-                }
-
-                if (!CollectionUtils.isEmpty(up)) {
-                    upEma = up.poll();
-                    if (up.size() > 1) {
-                        for (BigDecimal upElement : up) {
-                            upEma = (upElement.multiply(BigDecimal.valueOf(EMA))).add(upEma.multiply(
-                                    BigDecimal.valueOf(1 - EMA)));
-                        }
-                    }
-                }
-
-
-                double rs = upEma.doubleValue() / downEma.doubleValue();
-                double rsi = 100 - (100 / rs + 1);
-
-
-                log.info("asd" + " " + rsi);
                 log.info(tickerResult.toString());
                 break;
             case ORDERBOOK:

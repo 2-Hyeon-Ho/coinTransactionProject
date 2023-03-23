@@ -26,5 +26,5 @@ public class Coin {
     private String korName;
     @Column(nullable = false)
     private String engName;
-
+    private Double rsi;
 }

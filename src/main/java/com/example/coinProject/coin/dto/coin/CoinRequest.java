@@ -12,12 +12,14 @@ public class CoinRequest {
     private String market;
     private String korName;
     private String engName;
+    private Double rsi;
 
     public Coin toCoin() {
         return Coin.builder()
-            .market(market)
-            .korName(korName)
-            .engName(engName)
-            .build();
+                .market(market)
+                .korName(korName)
+                .engName(engName)
+                .rsi(rsi)
+                .build();
     }
 }

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table>
+    <tr>
+        <th>보유 화폐</th>
+        <th>보유 자산</th>
+    </tr>
+    <td> KRW</td>
+    <td th:text="${krw}"></td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <th>보유 코인</th>
+        <th>보유 자산</th>
+        <th> 매수 평균가</th>
+    </tr>
+    <tr th:each="a : ${coins}">
+
+        <td th:text="${a.getCurrency()}"></td>
+        <td th:text="${a.getBalance()}"></td>
+        <td th:text="${a.getAverageBuyPrice()}"></td>
+    </tr>
+</table>
+</body>
+</html>
