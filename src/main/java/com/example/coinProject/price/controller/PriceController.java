@@ -1,8 +1,6 @@
 package com.example.coinProject.price.controller;
 
 //import com.example.coinProject.price.service.PriceService;
-import com.example.coinProject.coin.domain.Coin;
-import com.example.coinProject.coin.dto.coin.CoinResponse;
 import com.example.coinProject.coin.service.CoinService;
 import com.example.coinProject.price.service.PriceService;
 import com.example.coinProject.price.service.TradeService;
@@ -11,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -31,7 +29,7 @@ public class PriceController {
     }
 
     @GetMapping("/rsi")
-    public Map<String,Double> getRsi() {
+    public Map<String,Double> getRsi() throws IOException, InterruptedException {
 
         return priceService.getAllMarketsRsi();
     }

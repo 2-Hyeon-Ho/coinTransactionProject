@@ -1,4 +1,4 @@
-package com.example.coinProject.account;
+package com.example.coinProject.account.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

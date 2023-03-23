@@ -1,14 +1,13 @@
-package com.example.coinProject.account;
+package com.example.coinProject.account.controller;
 
 
+import com.example.coinProject.account.dto.AccountResponse;
+import com.example.coinProject.account.service.AccountService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class AccountViewController {
 
         model.addAttribute("account", accountService.accounts());
         model.addAttribute("accounts",accounts);
-        return "index";
+        return "account";
 
     }
 }

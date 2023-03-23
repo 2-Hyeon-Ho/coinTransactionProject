@@ -4,12 +4,32 @@ import com.example.coinProject.coin.dto.coin.CoinResponse;
 import com.example.coinProject.coin.service.CoinService;
 import com.example.coinProject.coin.service.Feign;
 import com.example.coinProject.price.dto.PriceResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.tomcat.util.json.JSONParser;
+import org.h2.util.json.JSONObject;
+import org.springframework.boot.json.GsonJsonParser;
+import org.springframework.boot.json.JsonParser;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,11 +54,14 @@ public class PriceService {
     private List<Double> downList = new ArrayList<>();
     private static final double ZERO = 0;
 
-    public Double getRsi(String market) {
+    private Double getRsi(String market) {
+
+
         List<PriceResponse> tradePrices =
                 feign.getTradePrice(UNIT, market, COUNT).stream().
                         sorted(Comparator.comparing(PriceResponse::getTimestamp))
                         .collect(Collectors.toList());
+
         for (int i = 0; i < tradePrices.size() - 1; i++) {
             double gapByTradePrice = tradePrices.get(i + 1).getPrice().doubleValue() - tradePrices.get(i).getPrice().doubleValue();
             if (gapByTradePrice > 0) {
@@ -84,7 +107,8 @@ public class PriceService {
         return downEma;
     }
 
-    public Map<String, Double> getAllMarketsRsi() {
+    public Map<String, Double> getAllMarketsRsi() throws IOException, InterruptedException {
+
 
         Map<String, Double> coinsRsi = new HashMap<>();
 
@@ -93,7 +117,6 @@ public class PriceService {
 
         for (int i = 0; i < 38; i++) {
             if (coinResponse.get(i).getMarket().startsWith("KRW")) {
-
                 Double rsi = getRsi(coinResponse.get(i).getMarket());
                 coinsRsi.put(coinResponse.get(i).getMarket(), rsi);
 

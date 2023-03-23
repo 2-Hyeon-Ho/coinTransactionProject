@@ -1,4 +1,4 @@
-package com.example.coinProject.order;
+package com.example.coinProject.order.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

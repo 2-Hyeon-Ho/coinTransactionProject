@@ -1,22 +1,15 @@
-package com.example.coinProject.account;
+package com.example.coinProject.account.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.coinProject.accessKeys.Keys;
+import com.example.coinProject.account.dto.AccountResponse;
 import com.example.coinProject.common.JsonUtil;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -33,9 +26,9 @@ public class AccountService {
     public List<AccountResponse> accounts() {
 
 
-        Algorithm algorithm = Algorithm.HMAC256(keys.getSecretKey());
+        Algorithm algorithm = Algorithm.HMAC256(keys.getSsafySecretKey());
         String jwtToken = JWT.create()
-                .withClaim("access_key", keys.getAccessKey())
+                .withClaim("access_key", keys.getSsafyAccessKey())
                 .withClaim("nonce", UUID.randomUUID().toString())
                 .sign(algorithm);
 
