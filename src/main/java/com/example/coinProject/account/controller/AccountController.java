@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/account")
@@ -23,22 +22,13 @@ public class AccountController {
     public String accounts(Model model) {
         List<AccountResponse> accounts = accountService.accounts();
 
-        if(accounts.size() == 0) {
+        if (accounts.size() == 0) {
             throw new IllegalArgumentException("Account is not exist");
         }
 
-        String krw = accounts.stream().
-                filter(it -> it.getCurrency().equals("KRW")).
-                map(AccountResponse::getBalance).
-                findAny().get();
+        model.addAttribute("krw", accountService.getKRWBalance(accounts));
 
-        List<AccountResponse> coins = accounts.stream().
-                filter(it -> !it.getCurrency().equals("KRW")).
-                collect(Collectors.toList());
-
-
-        model.addAttribute("krw",krw);
-        model.addAttribute("coins",coins);
+        model.addAttribute("coins", accountService.getCoins(accounts));
 
         return "account";
     }

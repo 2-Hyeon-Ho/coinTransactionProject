@@ -13,17 +13,19 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AccountService {
 
     private RestTemplate restTemplate = new RestTemplate();
+
     public List<AccountResponse> accounts() {
 
-        Algorithm algorithm = Algorithm.HMAC256(Keys.hhSecretKey);
+        Algorithm algorithm = Algorithm.HMAC256(Keys.tempSecretKey);
         String jwtToken = JWT.create()
-                .withClaim("access_key", Keys.hhAccessKey)
+                .withClaim("access_key", Keys.tempAccessKey)
                 .withClaim("nonce", UUID.randomUUID().toString())
                 .sign(algorithm);
 
@@ -36,10 +38,25 @@ public class AccountService {
 
         URI uri = URI.create("https://api.upbit.com" + "/v1/accounts");
 
-        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET,new HttpEntity(httpHeaders), String.class);
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity(httpHeaders), String.class);
 
 
-        return JsonUtil.listFromJson(response.getBody(),AccountResponse.class);
+        return JsonUtil.listFromJson(response.getBody(), AccountResponse.class);
+    }
+
+    public List<AccountResponse> getCoins(List<AccountResponse> accounts) {
+        List<AccountResponse> coins = accounts.stream().
+                filter(it -> !it.getCurrency().equals("KRW")).
+                collect(Collectors.toList());
+        return coins;
+    }
+
+    public String getKRWBalance(List<AccountResponse> accounts) {
+        String krw = accounts.stream().
+                filter(it -> it.getCurrency().equals("KRW")).
+                map(AccountResponse::getBalance).
+                findAny().get();
+        return krw;
     }
 
 

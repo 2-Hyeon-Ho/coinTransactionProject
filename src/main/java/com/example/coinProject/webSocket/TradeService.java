@@ -1,4 +1,4 @@
-package com.example.coinProject.price.service;
+package com.example.coinProject.webSocket;
 
 import com.example.coinProject.common.TradeType;
 import com.example.coinProject.webSocket.UpbitWebSocketListener;

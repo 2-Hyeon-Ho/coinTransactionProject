@@ -19,6 +19,7 @@ public class CoinController {
 
     @GetMapping
     public List<CoinResponse> getMarket() {
+
         return coinService.getCoinResponse();
     }
 

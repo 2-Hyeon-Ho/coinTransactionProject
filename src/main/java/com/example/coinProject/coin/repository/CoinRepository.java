@@ -17,4 +17,7 @@ public interface CoinRepository extends JpaRepository<Coin, Integer> {
     @Modifying
     @Query("UPDATE Coin as c set c.rsi = :rsi where c.market = :market")
     void updateRsi(@Param("rsi")Double rsi, @Param("market")String market);
+
+
+
 }

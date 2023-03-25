@@ -10,13 +10,9 @@ import okio.ByteString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 import java.util.UUID;
 
 @Slf4j
@@ -24,12 +20,6 @@ import java.util.UUID;
 public class UpbitWebSocketListener extends WebSocketListener {
 
     public static final int CODE = 1000;    //기본값으로 정상 종료를 의미함
-
-    private static final int UNIT = 1;
-
-    private static final double EMA = (1 / 14);
-
-    public static List<BigDecimal> currentPrice = new ArrayList<>();
     private TradeType type;
     private String json;
 

@@ -14,5 +14,4 @@ public enum OrderSide {
     private String typeInKorean;
 
 
-
 }

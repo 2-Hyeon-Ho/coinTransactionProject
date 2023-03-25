@@ -22,6 +22,8 @@ public class CoinService {
     private final CoinRepository coinRepository;
     private final Feign feign;
 
+    private List<Coin> coins = new ArrayList<>();
+
 
     @Transactional
     public List<CoinResponse> getCoinResponse() {
@@ -32,19 +34,18 @@ public class CoinService {
     public List<CoinResponse> saveMarket() {
         List<CoinResponse> marketCode = feign.getMarketCode();
 
-        List<Coin> coins = new ArrayList<>();
 
         for (CoinResponse coinResponse : marketCode) {
-                CoinRequest coinRequest = new CoinRequest(
-                        coinResponse.getMarket(),
-                        coinResponse.getEngName(),
-                        coinResponse.getKorName(),
-                        coinResponse.getRsi()
-                );
+            CoinRequest coinRequest = new CoinRequest(
+                    coinResponse.getMarket(),
+                    coinResponse.getEngName(),
+                    coinResponse.getKorName(),
+                    coinResponse.getRsi()
+            );
 
-                Coin coin = coinRepository.save(coinRequest.toCoin());
+            Coin coin = coinRepository.save(coinRequest.toCoin());
 
-                coins.add(coin);
+            coins.add(coin);
 
 
         }
@@ -52,8 +53,6 @@ public class CoinService {
         return coins.stream().map(coin -> new CoinResponse(coin)).collect(Collectors.toList());
 
     }
-
-
 
 
 }
