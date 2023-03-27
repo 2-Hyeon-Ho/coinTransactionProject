@@ -136,11 +136,11 @@ public class OrderService {
     }
 
     private String getConvertedPrice(String price) {
-        double i = Double.parseDouble(price);
+        double d = Double.parseDouble(price);
 
-        int j = (int) i - 50;  // 추후에는 50% 로 하기
+        int j = (int) d - 50;  // 추후에는 50% 로 하기
 
-        String priceValue = String.valueOf(j);  // price 소수점 제거 작업
+        String priceValue = String.valueOf(d);  // price 소수점 제거 작업
         return priceValue;
     }
 
