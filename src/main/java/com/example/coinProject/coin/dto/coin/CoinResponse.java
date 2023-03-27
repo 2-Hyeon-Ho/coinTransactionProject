@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class CoinResponse {
 
-    private int coinNo;
+    private long id;
 
     private String market;
     @JsonProperty("korean_name")
@@ -24,7 +24,7 @@ public class CoinResponse {
 
 
     public CoinResponse(Coin coin) {
-        this.coinNo = coin.getCoinNo();
+        this.id = coin.getId();
         this.market = coin.getMarket();
         this.korName = coin.getKorName();
         this.engName = coin.getEngName();
