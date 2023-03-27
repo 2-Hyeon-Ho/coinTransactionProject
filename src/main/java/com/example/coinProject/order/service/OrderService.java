@@ -74,9 +74,9 @@ public class OrderService {
 
         String queryHash = String.format("%0128x", new BigInteger(1, md.digest()));
 
-        Algorithm algorithm = Algorithm.HMAC512(Keys.tempSecretKey);
+        Algorithm algorithm = Algorithm.HMAC512(Keys.homeSecretKey);
         String jwtToken = JWT.create()
-                .withClaim("access_key", Keys.tempAccessKey)
+                .withClaim("access_key", Keys.homeAccessKey)
                 .withClaim("nonce", UUID.randomUUID().toString())
                 .withClaim("query_hash", queryHash)
                 .withClaim("query_hash_alg", "SHA512")
@@ -108,17 +108,13 @@ public class OrderService {
     @Scheduled(fixedDelay = 1000)
 
     public void Order() throws Exception {  //무한 반복용
-        CoinResponse coinByMarket =
-                coinRepository.findCoinByMarket("KRW-BTC").get();
+        CoinResponse coinResponse = coinRepository.findCoinByMarket("KRW-XRP").get();
+        if (coinResponse.getRsi() < 33) {
+            order("KRW-XRP", "bid");
+        } else if (coinResponse.getRsi() > 60) {
+            order("KRW-XRP", "ask");
 
-
-        if (coinByMarket.getRsi() < 30) {
-            order("KRW-BTC", "bid");
-        } else if (coinByMarket.getRsi() > 50) {
-            order("KRW-BTC", "ask");
         }
-
-
     }
 
 
@@ -133,7 +129,7 @@ public class OrderService {
 
     private String getVolume() {
         return accountService.accounts().
-                stream().filter(it -> it.getCurrency().equals("BTC")).map(AccountResponse::getBalance)
+                stream().filter(it -> it.getCurrency().equals("XRP")).map(AccountResponse::getBalance)
                 .findAny().orElseThrow();
 
 

@@ -23,9 +23,9 @@ public class AccountService {
 
     public List<AccountResponse> accounts() {
 
-        Algorithm algorithm = Algorithm.HMAC256(Keys.tempSecretKey);
+        Algorithm algorithm = Algorithm.HMAC256(Keys.homeSecretKey);
         String jwtToken = JWT.create()
-                .withClaim("access_key", Keys.tempAccessKey)
+                .withClaim("access_key", Keys.homeAccessKey)
                 .withClaim("nonce", UUID.randomUUID().toString())
                 .sign(algorithm);
 

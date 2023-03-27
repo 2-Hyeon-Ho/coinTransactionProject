@@ -97,7 +97,8 @@ public class PriceService {
     @Transactional
     public void getAllMarketsRsi() {
 
-        String market = "KRW-BTC";
+
+        String market = "KRW-XRP";
 
         Coin coin = coinRepository.findFirstByMarket(market);
         Double rsi = getRsi(coin.getMarket());
