@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class Coin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer coinNo;
+    private Long id;
     @Column(nullable = false)
     private String market;
     @Column(nullable = false)
