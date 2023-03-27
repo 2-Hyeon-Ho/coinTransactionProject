@@ -2,7 +2,6 @@ package com.example.coinProject.price.service;
 
 import com.example.coinProject.coin.domain.Coin;
 import com.example.coinProject.coin.repository.CoinRepository;
-import com.example.coinProject.coin.service.CoinService;
 import com.example.coinProject.coin.service.Feign;
 import com.example.coinProject.price.dto.PriceResponse;
 import lombok.RequiredArgsConstructor;
@@ -96,13 +95,12 @@ public class PriceService {
     @Scheduled(fixedDelay = 1000)
     @Transactional
     public void getAllMarketsRsi() {
+        List<Coin> coins = coinRepository.findAll().stream()
+            .filter(it -> it.getMarket().startsWith("KRW")).distinct().collect(Collectors.toList());
 
-        String market = "KRW-BTC";
-
-        Coin coin = coinRepository.findFirstByMarket(market);
-        Double rsi = getRsi(coin.getMarket());
-        coinRepository.updateRsi(rsi, market);
+        for (Coin coin : coins) {
+            Double rsi = getRsi(coin.getMarket());
+            coinRepository.updateRsi(rsi, coin.getMarket());
+        }
     }
-
-
 }

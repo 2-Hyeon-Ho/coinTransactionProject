@@ -9,6 +9,7 @@ import com.example.coinProject.coin.dto.coin.CoinResponse;
 import com.example.coinProject.coin.repository.CoinRepository;
 import com.example.coinProject.common.JsonUtil;
 import com.example.coinProject.order.dto.OrderResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -40,7 +41,7 @@ public class OrderService {
     private HashMap<String, String> params = new HashMap<>();
 
 
-    private void order(String market, String side) throws Exception {
+    private void order(String market, String side, int percentage) throws Exception {
 
 
         params.put("market", market);
@@ -49,7 +50,7 @@ public class OrderService {
         if (side.equals("bid")) {
 
             params.put("volume", null);
-            params.put("price", getConvertedPrice(getPrice("KRW")));
+            params.put("price", getConvertedPrice(getPrice("KRW"), percentage));
             params.put("ord_type", "price");
 
 
@@ -74,9 +75,9 @@ public class OrderService {
 
         String queryHash = String.format("%0128x", new BigInteger(1, md.digest()));
 
-        Algorithm algorithm = Algorithm.HMAC512(Keys.tempSecretKey);
+        Algorithm algorithm = Algorithm.HMAC512(Keys.hhSecretKey);
         String jwtToken = JWT.create()
-                .withClaim("access_key", Keys.tempAccessKey)
+                .withClaim("access_key", Keys.hhAccessKey)
                 .withClaim("nonce", UUID.randomUUID().toString())
                 .withClaim("query_hash", queryHash)
                 .withClaim("query_hash_alg", "SHA512")
@@ -108,19 +109,26 @@ public class OrderService {
     @Scheduled(fixedDelay = 1000)
 
     public void Order() throws Exception {  //무한 반복용
-        CoinResponse coinByMarket =
-                coinRepository.findCoinByMarket("KRW-BTC").get();
 
-
-        if (coinByMarket.getRsi() < 30) {
-            order("KRW-BTC", "bid");
-        } else if (coinByMarket.getRsi() > 50) {
-            order("KRW-BTC", "ask");
+        //DB에서 자동 매매 걸어둔 코인 전부 조회해서 List<CoinResponse>타입으로 반환
+        List<CoinResponse> coinResponseList = new ArrayList<>();
+        List<String> markets = new ArrayList<>();
+        //이런식으로 돌림
+        for (CoinResponse coinResponse : coinResponseList) {
+            markets.add(coinResponse.getMarket());
         }
 
 
+        for (String market : markets) {
+            CoinResponse coinByMarket =
+                coinRepository.findCoinByMarket(market).get();
+            if (coinByMarket.getRsi() < 33) {
+                order(market, "bid", 50);
+            } else if (coinByMarket.getRsi() > 65) {
+                order(market, "ask", 50);
+            }
+        }
     }
-
 
     private String getPrice(String KRW) {
         return accountService.accounts().stream().
@@ -139,16 +147,14 @@ public class OrderService {
 
     }
 
-    private String getConvertedPrice(String price) {
-        double i = Double.parseDouble(price);
+    private String getConvertedPrice(String price, int percentage) {
+        double balance = Double.parseDouble(price);
 
-        int j = (int) i - 50;  // 추후에는 50% 로 하기
+        double percentageOrder = balance * (percentage / 100.0);
+        double possibleOrderBalance = percentageOrder * (100 - 0.0005);
 
-        String priceValue = String.valueOf(j);  // price 소수점 제거 작업
-        return priceValue;
+        return String.valueOf(Math.floor(possibleOrderBalance));  // price 소수점 제거 작업
     }
-
-
 }
 
 
